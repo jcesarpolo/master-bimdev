@@ -1,0 +1,19 @@
+{
+  "name": "bim-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "vite": "^5.0.4"
+  },
+  "dependencies": {
+    "typescript": "^5.3.2",
+    "uuid": "^9.0.1"
+  }
+}

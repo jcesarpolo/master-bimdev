@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BIM App</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">
+    <link href="https://fonts.googleapis.com/css?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Two+Tone|Material+Icons+Round|Material+Icons+Sharp" rel="stylesheet">
+</head>
+<body>
+    <aside id="sidebar">
+        <img id="company-logo" src="./assets/company-logo.svg" alt="Construction Company">
+        <ul id="nav-buttons">
+            <li id="projects-nav-btn"><span class="material-icons-round">apartment</span>
+                Projects
+            </li>
+            <li><span class="material-icons-round">person</span>
+                Users
+            </li>
+        </ul>
+    </aside>
+    <main id="content">
+        <div class="page" id="projects-page">
+            <dialog id="new-project-modal">
+                <form id="new-project-form">
+                    <h2>New Project</h2>
+                    <div class="input-list">
+                        <div class="form-field-container">
+                            <label><span class="material-icons-round">apartment</span>Name</label>
+                            <input name="name" type="text" placeholder="What's the name of your project?">
+                            <p style="color: gray; font-size: var(--font-sm); font-style: italic; margin-top: 5px;">TIP: Whaever</p>
+                        </div>
+                        <div class="form-field-container">
+                            <label><span class="material-icons-round">subject</span>Description</label>
+                            <textarea name="description" cols="30" rows="5" placeholder="Give your description here."></textarea>
+                        </div>
+                        <div class="form-field-container">
+                            <label><span class="material-icons-round">account_circle</span>Role</label>
+                            <select name="role">
+                                <option>Architect</option>
+                                <option>Engineer</option>
+                                <option>Developer</option>
+                            </select>
+                        </div>
+                        <div class="form-field-container">
+                            <label><span class="material-icons-round">not_listed_location</span>Status</label>
+                            <select name="status">
+                                <option>Pending</option>
+                                <option>Active</option>
+                                <option>Finished</option>
+                            </select>
+                        </div>
+                        <div class="form-field-container"></div>
+                        <div class="form-field-container">
+                            <label><span class="material-icons-round">today</span>Finish Date</label>
+                            <input name="finish-date" type="date">
+                        </div>
+                        <div class="form-field-container"></div>
+                    </div>
+                    <div id="form-buttons">
+                        <button type="reset" class="cancel-button">Cancel</button>
+                        <button type="submit" class="accept-button">Accept</button>
+                    </div>
+                </form>
+            </dialog>
+            <dialog id="error-popup">
+                <div style = "display: flex; flex-direction: row;">
+                    <div style= "background-color: #fb5757; padding: 30px; aspect-ratio: 1;">
+                        <span class="material-icons-outlined" style="color: white;">error</span>                    
+                    </div>
+                    <div style="display: flex; flex-direction: row; background-color: var(--background-200); align-items: center;">
+                        <div style="display: flex; flex-direction: column; row-gap: 5px;padding: 15px;">
+                            <h2 style="color: white;">Error</h2>
+                            <p id="error-popup-text" style="color: #969696;"></p>
+                        </div>
+                    </div>
+                </div>
+            </dialog>
+            <header>
+                <h2>Projects</h2>
+                <div style="display: flex; align-items: center; column-gap: 15px;">
+                    <span id="import-projects-btn" class="material-icons-round action-icon">file_upload</span>
+                    <span id="export-projects-btn" class="material-icons-round action-icon">file_download</span>
+                    <button id="new-project-btn"><span class="material-icons-round">add</span>
+                        New Project
+                    </button>
+                </div>
+            </header>
+            <div id="projects-list">
+                <!--
+                <div class="project-card">
+                    <div class="card-header">
+                        <p style="background-color: #ca8134; padding: 10px; border-radius: 8px; aspect-ratio: 1;">HC</p>
+                        <div>
+                            <h5>Project Name</h5>
+                            <p>Project Description here...</p>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-property">
+                            <p style="color: #969696;">Status</p>
+                            <p>Active</p>
+                        </div>
+                        <div class="card-property">
+                            <p style="color: #969696;">Role</p>
+                            <p>Engineer</p>
+                        </div>
+                        <div class="card-property">
+                            <p style="color: #969696;">Cost</p>
+                            <p>$ 2'000.000</p>
+                        </div>
+                        <div class="card-property">
+                            <p style="color: #969696;">Estimated Progress</p>
+                            <p>43%</p>
+                        </div>
+                    </div>
+                </div>
+                -->
+            </div>
+        </div>
+        <div class="page" id="project-details" style="display: none;">
+            <header>
+                <div>
+                    <h2>Hospital Center</h2>
+                    <p style="color: #969696;">Community hospital located at downtown</p>
+                </div>
+            </header>
+            <div class="main-page-content">
+                <div style="display: flex; flex-direction: column; row-gap: 30px;">
+                    <div class="dashboard-card" style="padding: 30px 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0px 30px; margin-bottom: 30px;">
+                            <p style="background-color: #ca8134; padding: 12px; font-size: 20px; aspect-ratio: 1; border-radius: 100%;">HC</p>
+                            <button class="btn-secondary"><p style="width: 100%;">Edit</p></button>
+                        </div>
+                        <div style="padding: 0 30px;">
+                            <h4>Hospital Center</h4>
+                            <p>Community hospital located at downtown</p>
+                        </div>
+                        <div style="display: flex; column-gap: 30px; padding: 30px; justify-content: space-between;">
+                            <div>
+                                <p style="color: #969696; font-size: var(--font-sm);">Status</p>
+                                <p>Active</p>
+                            </div>
+                            <div>
+                                <p style="color: #969696; font-size: var(--font-sm);">Cost</p>
+                                <p>$ 2'542.000</p>
+                            </div>
+                            <div>
+                                <p style="color: #969696; font-size: var(--font-sm);">Role</p>
+                                <p>Engineer</p>
+                            </div>
+                            <div>
+                                <p style="color: #969696; font-size: var(--font-sm);">Finish Date</p>
+                                <p>2023-05-01</p>
+                            </div>
+                        </div>
+                        <div style="background-color: #484848; border-radius: 9999px; overflow: auto; margin: 0px 30px;">
+                            <div style="width: 80%; background-color: green; text-align: center; padding: 4px 0;">80%</div>
+                        </div>
+                    </div>
+                    <div class="dashboard-card" style="flex-grow: 1; padding: 30px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h4 style="width: 100px;">To-Do</h4>
+                            <div style="display: flex; justify-content: space-between; align-items: center; column-gap: 10px; justify-content: right;">
+                                <span class="material-icons-round">search</span>
+                                <input placeholder="Search To-Do's by name"></input>
+                            </div>
+                            <span class="material-icons-round">add</span>
+                        </div>
+                        <div style="display: flex; flex-direction: column; padding: 10px 0px; row-gap: 20px;">
+                            <div class="todo-item">
+                                <div style="display: flex; flex-direction: row; column-gap: 10px; border-radius: 10px; align-items: center;">
+                                    <div style="display: flex; column-gap: 15px; align-items: center;">
+                                        <p style="background-color: #979696; aspect-ratio: 1; align-items: center; border-radius: 10px; padding: 8px;"><span class="material-icons-round">
+                                            construction
+                                            </span></p>
+                                        <p style="font-size: var(--font-sm);">Make anything here  as you want,even something longer</p>
+                                    </div>
+                                    <p style="width: 100px; font-size: var(--font-base);">Fri, 20 sep</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="viewer-container" class="dashboard-card"></div>
+            </div>
+        </div>
+        <div class="page" id="users-page" style="display: none;">
+            <header>
+                <h2>Users</h2>
+                <button>
+                    <p style="display: flex; align-items: center; column-gap: 5px; justify-content: center;"><span class="material-icons-round">add</span>Add Member</p>
+                </button>
+            </header>
+            <div id="users-list" style="padding: 30px;">
+                <div style="display: grid; align-items: center; column-gap: 20px; grid-template-columns: 20px 1fr;">
+                    <span class="material-icons-round">search</span>
+                    <input type="text" placeholder="Search Users">
+                </div>
+                <div class="user-card">
+                    <div style="display: flex; justify-content: space-between; padding: 15px 30px; align-items: center;">
+                        <img src="https://writestylesonline.com/wp-content/uploads/2018/11/Three-Statistics-That-Will-Make-You-Rethink-Your-Professional-Profile-Picture.jpg" alt="user photo" style="height: 50px;border-radius: 100%;">
+                        <div>
+                            <h4>Julio Polo</h4>
+                            <p>juliopolo@hotmail.com</p>
+                        </div>
+                        <div>
+                            <h4>Polo Architecture</h4>
+                            <p>Barranquilla, Atlantico</p>
+                        </div>
+                        <div>
+                            <h4>Architect</h4>
+                            <p>Un texto cualquiera</p>
+                        </div>
+                        <div>
+                            <h4>Active</h4>
+                            <p>Last active: 3h ago</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="user-card">
+                    <div style="display: flex; justify-content: space-between; padding: 15px 30px; align-items: center;">
+                        <img src="https://pbs.twimg.com/media/FjU2lkcWYAgNG6d.jpg" alt="user photo" style="height: 50px; border-radius: 100%;">
+                        <div>
+                            <h4>Pepito Perez</h4>
+                            <p>juliopolo@hotmail.com</p>
+                        </div>
+                        <div>
+                            <h4>Polo Architecture</h4>
+                            <p>Barranquilla, Atlantico</p>
+                        </div>
+                        <div>
+                            <h4>Architect</h4>
+                            <p>Un texto cualquiera</p>
+                        </div>
+                        <div>
+                            <h4>Active</h4>
+                            <p>Last active: 3h ago</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="user-card">
+                    <div style="display: flex; justify-content: space-between; padding: 15px 30px; align-items: center;">
+                        <img src="https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500" alt="user photo" style="height: 50px;border-radius: 100%;">
+                        <div>
+                            <h4>Cristiano Ronaldo</h4>
+                            <p>juliopolo@hotmail.com</p>
+                        </div>
+                        <div>
+                            <h4>Polo Architecture</h4>
+                            <p>Barranquilla, Atlantico</p>
+                        </div>
+                        <div>
+                            <h4>Architect</h4>
+                            <p>Un texto cualquiera</p>
+                        </div>
+                        <div>
+                            <h4>Active</h4>
+                            <p>Last active: 3h ago</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="user-card">
+                    <div style="display: flex; justify-content: space-between; padding: 15px 30px; align-items: center;">
+                        <img src="https://imgv3.fotor.com/images/gallery/Realistic-Male-Profile-Picture.jpg" alt="user photo" style="height: 50px;border-radius: 100%;">
+                        <div>
+                            <h4>Steve Jobs</h4>
+                            <p>juliopolo@hotmail.com</p>
+                        </div>
+                        <div>
+                            <h4>Polo Architecture</h4>
+                            <p>Barranquilla, Atlantico</p>
+                        </div>
+                        <div>
+                            <h4>Architect</h4>
+                            <p>Un texto cualquiera</p>
+                        </div>
+                        <div>
+                            <h4>Active</h4>
+                            <p>Last active: 3h ago</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script type="module" src="./src/index.ts"></script>
+</body>
+</html>
