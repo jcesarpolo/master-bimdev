@@ -25,11 +25,34 @@ export class ProjectsManager {
             if (!projectsPage || !detailsPage) {return}
             projectsPage.style.display = "none"
             detailsPage.style.display = "flex"
+            this.setDetailsPage(project)
         })
 
         this.ui.appendChild(project.ui)
         this.list.push(project)
         return project
+    }
+
+    setDetailsPage (project: Project) {
+        const detailsPage = document.getElementById("project-details")
+        if (!detailsPage) { return }
+        const names = detailsPage.querySelectorAll("[data-project-info='name']")
+        if (names) {names.forEach((name)=>{name.textContent = project.name})}
+        const descriptions = detailsPage.querySelectorAll("[data-project-info='description']")
+        if (descriptions) { descriptions.forEach((description)=>{description.textContent = project.description})}
+        const status = detailsPage.querySelector("[data-project-info='status']")
+        if (status) {status.textContent = project.status}
+        const cost = detailsPage.querySelector("[data-project-info='cost']")
+        if (cost) {cost.textContent ="$" + project.cost.toString()}
+        const role = detailsPage.querySelector("[data-project-info='role']")
+        if (role) {role.textContent = project.role}
+        const finishDate = detailsPage.querySelector("[data-project-info='finish-date']")
+        if (finishDate) {finishDate.textContent = project.finishDate.toDateString()}
+        const progress = detailsPage.querySelector("[data-project-info='progress']") as HTMLDivElement
+        if (progress) {
+            progress.textContent = `${project.progress}%`
+            progress.style.width = `${project.progress}%`
+        }
     }
 
     getProject (id: string) {
