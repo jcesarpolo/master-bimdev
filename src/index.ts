@@ -12,7 +12,7 @@ function toggleModal(id : string, toggle: boolean) {
             modal.close()
         }
     } else {
-        console.warn("Modal Id not found on the page")
+        console.warn(`Modal "${id}" not found on the page`)
     }
 }
 
