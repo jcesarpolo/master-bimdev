@@ -6,6 +6,14 @@ export class ProjectsManager {
 
     constructor(container: HTMLElement) {
         this.ui = container
+        const project = this.newProject({
+            name: "Project 1",
+            description: "This is a description",
+            role: "Architect",
+            status: "Active",
+            finishDate: new Date()
+            })
+        project.ui.click()
     }
 
 
@@ -16,6 +24,9 @@ export class ProjectsManager {
         const nameInUuse = (projectNames.includes(data.name))
         if (nameInUuse) {
             throw new Error(`A project with the name "${data.name}" already exist`)
+        }
+        if (data.name.length < 5) {
+            throw new Error("The project name must be at least 5 characters long")
         }
 
         const project = new Project(data)
@@ -53,6 +64,8 @@ export class ProjectsManager {
             progress.textContent = `${project.progress}%`
             progress.style.width = `${project.progress}%`
         }
+        const initials = detailsPage.querySelector("[data-project-info='initials']") as HTMLElement
+        if (initials) {initials.textContent = project.getInitials()}
     }
 
     getProject (id: string) {
@@ -120,8 +133,5 @@ export class ProjectsManager {
             reader.readAsText(filesList[0])
         })
         input.click()
-    }
-
-
-    
+    }   
 }

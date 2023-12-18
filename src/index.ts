@@ -1,3 +1,4 @@
+import * as THREE from "three";
 import { Project, IProject, UserRole, ProjectStatus} from "./class/Project";
 import { ProjectsManager } from "./class/ProjectsManager";
 
@@ -39,12 +40,13 @@ if (projectForm && popup && projectForm instanceof HTMLFormElement) {
             description: formData.get("description") as string,
             role: formData.get("role") as UserRole,
             status: formData.get("status") as ProjectStatus,
-            finishDate: new Date(formData.get("finish-date") as string)
+            finishDate: new Date(formData.get("finish-date") as string).getTime()? new Date(formData.get("finish-date") as string) : new Date()
         }
         try{
             const project = projectsManager.newProject(projectData)
             projectForm.reset()
             toggleModal("new-project-modal", false)
+            //console.log(project)
         }
         catch (error) {
             const message = popup.querySelector("#error-popup-text")
@@ -87,3 +89,17 @@ if (projectsNavBtn && projectsPage && detailsPage) {
         projectsPage.style.display = "flex"
     })
 }
+
+//ThreeJS Viewer
+const scene = new THREE.Scene()
+
+const viewerContainer = document.getElementById("viewer-container") as HTMLElement
+const containerDimensions = viewerContainer.getBoundingClientRect()
+const aspectRatio = containerDimensions.width / containerDimensions.height
+const camera = new THREE.PerspectiveCamera(75, aspectRatio)
+
+const renderer = new THREE.WebGLRenderer()
+viewerContainer.append(renderer.domElement)
+renderer.setSize(containerDimensions.width, containerDimensions.height)
+
+renderer.render(scene, camera)

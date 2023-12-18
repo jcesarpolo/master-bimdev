@@ -198,6 +198,10 @@ header {
     font-size: var(--font-medium);
 }
 
+.card-header p {
+    justify-self: center;
+}
+
 .card-content {
     padding: 30px 20px;
     display: flex;

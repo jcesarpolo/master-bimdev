@@ -1,7 +1,7 @@
 import { v4 as uuidv4} from "uuid";
 
-export type ProjectStatus = "active" | "pending" | "finished";
-export type UserRole = "architect" | "developer" | "engineer";
+export type ProjectStatus = "Active" | "Pending" | "Finished";
+export type UserRole = "Architect" | "Developer" | "Engineer";
 
 
 export interface IProject {
@@ -41,7 +41,7 @@ export class Project implements IProject{
         this.ui.className = "project-card"
         this.ui.innerHTML = `
         <div class="card-header">
-            <p style="background-color: #ca8134; padding: 10px; border-radius: 8px; aspect-ratio: 1;">HC</p>
+            <p style="background-color: #ca8134; padding: 10px; border-radius: 8px; aspect-ratio: 1; min-width:20px;">${this.getInitials()}</p>
             <div>
                 <h5>${this.name}</h5>
                 <p>${this.description}</p>
@@ -67,4 +67,12 @@ export class Project implements IProject{
         </div> `
     }
 
+    getInitials() {
+        const name = this.name
+        const names = name.split(" ")
+        const initials = names.map((name) => {
+            return name[0].toUpperCase()
+        })
+        return initials.join("")
+    }
 }
