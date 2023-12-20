@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import {OrbitControls} from "three/examples/jsm/controls/OrbitControls"
 import { Project, IProject, UserRole, ProjectStatus} from "./class/Project";
 import { ProjectsManager } from "./class/ProjectsManager";
 
@@ -94,12 +95,38 @@ if (projectsNavBtn && projectsPage && detailsPage) {
 const scene = new THREE.Scene()
 
 const viewerContainer = document.getElementById("viewer-container") as HTMLElement
-const containerDimensions = viewerContainer.getBoundingClientRect()
-const aspectRatio = containerDimensions.width / containerDimensions.height
-const camera = new THREE.PerspectiveCamera(75, aspectRatio)
+const camera = new THREE.PerspectiveCamera(75)
+camera.position.z = 4
 
-const renderer = new THREE.WebGLRenderer()
+const renderer = new THREE.WebGLRenderer({alpha: true, antialias: true})
 viewerContainer.append(renderer.domElement)
-renderer.setSize(containerDimensions.width, containerDimensions.height)
 
-renderer.render(scene, camera)
+function resizeViewer() {
+    const containerDimensions = viewerContainer.getBoundingClientRect()
+    renderer.setSize(containerDimensions.width, containerDimensions.height)
+    const aspectRatio = containerDimensions.width / containerDimensions.height
+    camera.aspect = aspectRatio
+    camera.updateProjectionMatrix() 
+}
+
+window.addEventListener("resize", () => { resizeViewer()})
+resizeViewer()
+
+const boxGeometry = new THREE.BoxGeometry()
+const material = new THREE.MeshStandardMaterial({color: "#B2BEB5"})
+const cube = new THREE.Mesh(boxGeometry, material)
+
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5)
+scene.add(cube, ambientLight, directionalLight)
+
+const cameraControls = new OrbitControls(camera, renderer.domElement)
+
+function renderScene(){
+    renderer.render(scene, camera)
+    requestAnimationFrame(renderScene)
+}
+
+renderScene()
+
+
