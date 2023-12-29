@@ -1,5 +1,9 @@
 import * as THREE from "three";
+import * as OBC from "openbim-components"
+import {GUI} from "three/examples/jsm/libs/lil-gui.module.min"
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls"
+import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
+import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader";
 import { Project, IProject, UserRole, ProjectStatus} from "./class/Project";
 import { ProjectsManager } from "./class/ProjectsManager";
 
@@ -92,41 +96,115 @@ if (projectsNavBtn && projectsPage && detailsPage) {
 }
 
 //ThreeJS Viewer
-const scene = new THREE.Scene()
+// const scene = new THREE.Scene()
 
-const viewerContainer = document.getElementById("viewer-container") as HTMLElement
-const camera = new THREE.PerspectiveCamera(75)
-camera.position.z = 4
+// const viewerContainer = document.getElementById("viewer-container") as HTMLElement
+// const camera = new THREE.PerspectiveCamera(75)
+// camera.position.z = 4
 
-const renderer = new THREE.WebGLRenderer({alpha: true, antialias: true})
-viewerContainer.append(renderer.domElement)
+// const renderer = new THREE.WebGLRenderer({alpha: true, antialias: true})
+// viewerContainer.append(renderer.domElement)
 
-function resizeViewer() {
-    const containerDimensions = viewerContainer.getBoundingClientRect()
-    renderer.setSize(containerDimensions.width, containerDimensions.height)
-    const aspectRatio = containerDimensions.width / containerDimensions.height
-    camera.aspect = aspectRatio
-    camera.updateProjectionMatrix() 
-}
+// function resizeViewer() {
+//     const containerDimensions = viewerContainer.getBoundingClientRect()
+//     renderer.setSize(containerDimensions.width, containerDimensions.height)
+//     const aspectRatio = containerDimensions.width / containerDimensions.height
+//     camera.aspect = aspectRatio
+//     camera.updateProjectionMatrix() 
+// }
 
-window.addEventListener("resize", () => { resizeViewer()})
-resizeViewer()
+// window.addEventListener("resize", () => { resizeViewer()})
+// resizeViewer()
 
 const boxGeometry = new THREE.BoxGeometry()
 const material = new THREE.MeshStandardMaterial({color: "#B2BEB5"})
 const cube = new THREE.Mesh(boxGeometry, material)
 
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
-const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5)
-scene.add(cube, ambientLight, directionalLight)
+// const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
+// const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5)
+// //scene.add(cube)
+// scene.add(ambientLight, directionalLight)
 
-const cameraControls = new OrbitControls(camera, renderer.domElement)
+// const cameraControls = new OrbitControls(camera, renderer.domElement)
 
-function renderScene(){
-    renderer.render(scene, camera)
-    requestAnimationFrame(renderScene)
+// function renderScene(){
+//     renderer.render(scene, camera)
+//     requestAnimationFrame(renderScene)
+// }
+// renderScene()
+
+// const axis = new THREE.AxesHelper()
+// const grid = new THREE.GridHelper()
+// grid.material.transparent = true
+// grid.material.opacity = 0.4
+// grid.material.color = new THREE.Color("#808080")
+
+// scene.add(axis, grid)
+
+// const gui = new GUI()
+// const cubeControls = gui.addFolder("Cube")
+// cubeControls.add(cube.position, "x", -10, 10, 1)
+// cubeControls.add(cube.position, "y", -10, 10, 1)
+// cubeControls.add(cube.position, "z", -10, 10, 1)
+// cubeControls.add(cube, "visible")
+// cubeControls.addColor(material, "color")
+
+// const dlightHelper = new THREE.DirectionalLightHelper(directionalLight, 2)
+// scene.add(dlightHelper)
+// const lightControls = gui.addFolder("Lights")
+// lightControls.add(directionalLight, "intensity", 0, 1, 0.1)
+// lightControls.add(directionalLight.position, "x", -10, 10, 1)
+// lightControls.add(directionalLight.position, "y", -10, 10, 1)
+// lightControls.add(directionalLight.position, "z", -10, 10, 1)
+
+// const objLoader = new OBJLoader()
+// const mtlLoader = new MTLLoader()
+// objLoader.load("../assets/Gear/Gear1.obj", (mesh) => {
+//     scene.add(mesh)
+// })
+// mtlLoader.load("../assets/Gear/Gear1.mtl", (materials) => {
+//     materials.preload()
+//     objLoader.setMaterials(materials)
+// })
+
+const viewer = new OBC.Components()
+
+const sceneComponent = new OBC.SimpleScene(viewer)
+sceneComponent.setup()
+viewer.scene = sceneComponent
+const scene = sceneComponent.get()
+scene.background = null
+
+const viewerContainer = document.getElementById("viewer-container") as HTMLElement
+const rendererComponent = new OBC.PostproductionRenderer(viewer, viewerContainer)
+viewer.renderer = rendererComponent
+
+const cameraComponent = new OBC.OrthoPerspectiveCamera(viewer)
+viewer.camera = cameraComponent
+cameraComponent.updateAspect()
+rendererComponent.postproduction.enabled = true
+
+viewer.init()
+//scene.add(cube)
+
+const ifcloader = new OBC.FragmentIfcLoader(viewer)
+ifcloader.settings.wasm = {
+    path: "https://unpkg.com/web-ifc@0.0.43/",
+    absolute: true
 }
 
-renderScene()
+const raycaster = new OBC.SimpleRaycaster(viewer)
+viewer.raycaster = raycaster
+const highlighter = new OBC.FragmentHighlighter(viewer)
+highlighter.setup()
+
+ifcloader.onIfcLoaded.add((model) => {
+    highlighter.update()
+})
 
 
+const toolbar = new OBC.Toolbar(viewer)
+toolbar.addChild(
+    ifcloader.uiElement.get("main")
+)
+viewer.ui.addToolbar(toolbar)
