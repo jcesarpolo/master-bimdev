@@ -198,13 +198,47 @@ viewer.raycaster = raycaster
 const highlighter = new OBC.FragmentHighlighter(viewer)
 highlighter.setup()
 
-ifcloader.onIfcLoaded.add((model) => {
-    highlighter.update()
+const classifier = new OBC.FragmentClassifier(viewer)
+const classificationWindow = new OBC.FloatingWindow(viewer)
+classificationWindow.visible = false
+classificationWindow.title = "Model Groups"
+viewer.ui.add(classificationWindow)
+
+const classificationBtn = new OBC.Button(viewer)
+classificationBtn.materialIcon = "account_tree"
+
+classificationBtn.onClick.add(() => {
+    classificationWindow.visible = !classificationWindow.visible
+    classificationBtn.active = classificationWindow.visible
 })
 
+async function createModelTree() {
+    const fragmentTree = new OBC.FragmentTree(viewer)
+    await fragmentTree.init()
+    await fragmentTree.update(["model","storeys", "entities"])
+    fragmentTree.onHovered.add((fragmentMap) => {
+        highlighter.highlightByID("hover", fragmentMap)
+    })
+    fragmentTree.onSelected.add((fragmentMap) => {
+        highlighter.highlightByID("select", fragmentMap)
+    })
+    const tree = fragmentTree.get().uiElement.get("tree")
+    return tree
+}
+
+ifcloader.onIfcLoaded.add(async (model) => {
+    highlighter.update()
+    classifier.byModel(model.name, model)
+    classifier.byStorey(model)
+    classifier.byEntity(model)
+    const tree = await createModelTree()
+    classificationWindow.slots.content.dispose(true)
+    classificationWindow.addChild(tree)
+})
 
 const toolbar = new OBC.Toolbar(viewer)
 toolbar.addChild(
-    ifcloader.uiElement.get("main")
+    ifcloader.uiElement.get("main"),
+    classificationBtn
 )
 viewer.ui.addToolbar(toolbar)
