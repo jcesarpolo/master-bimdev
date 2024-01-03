@@ -192,11 +192,16 @@ ifcloader.settings.wasm = {
     absolute: true
 }
 
+//Higfhlighter setup
 const raycaster = new OBC.SimpleRaycaster(viewer)
 viewer.raycaster = raycaster
 const highlighter = new OBC.FragmentHighlighter(viewer)
 highlighter.setup()
 
+//Initialize the Properties Processor
+const propertiesProcessor = new OBC.IfcPropertiesProcessor(viewer)
+
+//Classify the model
 const classifier = new OBC.FragmentClassifier(viewer)
 const classificationWindow = new OBC.FloatingWindow(viewer)
 classificationWindow.visible = false
@@ -233,11 +238,18 @@ ifcloader.onIfcLoaded.add(async (model) => {
     const tree = await createModelTree()
     classificationWindow.slots.content.dispose(true)
     classificationWindow.addChild(tree)
+
+    propertiesProcessor.process(model)
+    highlighter.events.select.onHighlight.add((fragmentMap) => {
+        const expressID = [...Object.values(fragmentMap)[0]][0]
+        propertiesProcessor.renderProperties(model, Number(expressID))
+    })
 })
 
 const toolbar = new OBC.Toolbar(viewer)
 toolbar.addChild(
     ifcloader.uiElement.get("main"),
-    classificationBtn
+    classificationBtn,
+    propertiesProcessor.uiElement.get("main")
 )
 viewer.ui.addToolbar(toolbar)
