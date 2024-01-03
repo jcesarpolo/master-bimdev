@@ -185,7 +185,6 @@ cameraComponent.updateAspect()
 rendererComponent.postproduction.enabled = true
 
 viewer.init()
-//scene.add(cube)
 
 const ifcloader = new OBC.FragmentIfcLoader(viewer)
 ifcloader.settings.wasm = {
