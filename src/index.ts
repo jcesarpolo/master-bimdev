@@ -6,6 +6,7 @@ import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
 import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader";
 import { Project, IProject, UserRole, ProjectStatus} from "./class/Project";
 import { ProjectsManager } from "./class/ProjectsManager";
+import { FragmentsGroup } from "bim-fragment";
 
 // Function to show or hide the modal depending on a toggle.
 function toggleModal(id : string, toggle: boolean) {
@@ -186,6 +187,21 @@ rendererComponent.postproduction.enabled = true
 
 viewer.init()
 
+//Fragment Manager and download
+//Must be after the viewer is initialized and before the ifc loader is created
+const fragmentManager = new OBC.FragmentManager(viewer)
+function exportFragments(model : FragmentsGroup) {
+    const fragmentsBinary = fragmentManager.export(model)
+    const blob = new Blob([fragmentsBinary])
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `${model.name.replace(".ifc", "")}.frag`
+    a.click()
+    URL.revokeObjectURL(url)
+}
+
+
 const ifcloader = new OBC.FragmentIfcLoader(viewer)
 ifcloader.settings.wasm = {
     path: "https://unpkg.com/web-ifc@0.0.43/",
@@ -200,6 +216,9 @@ highlighter.setup()
 
 //Initialize the Properties Processor
 const propertiesProcessor = new OBC.IfcPropertiesProcessor(viewer)
+highlighter.events.select.onClear.add(() => {
+    propertiesProcessor.cleanPropertiesList()
+})
 
 //Classify the model
 const classifier = new OBC.FragmentClassifier(viewer)
@@ -230,25 +249,63 @@ async function createModelTree() {
     return tree
 }
 
-ifcloader.onIfcLoaded.add(async (model) => {
+async function onModelLoaded(model: FragmentsGroup){
     highlighter.update()
-    classifier.byModel(model.name, model)
-    classifier.byStorey(model)
-    classifier.byEntity(model)
-    const tree = await createModelTree()
-    classificationWindow.slots.content.dispose(true)
-    classificationWindow.addChild(tree)
+    try {
+        classifier.byModel(model.name, model)
+        classifier.byStorey(model)
+        classifier.byEntity(model)
+        const tree = await createModelTree()
+        classificationWindow.slots.content.dispose(true)
+        classificationWindow.addChild(tree)
 
-    propertiesProcessor.process(model)
-    highlighter.events.select.onHighlight.add((fragmentMap) => {
-        const expressID = [...Object.values(fragmentMap)[0]][0]
-        propertiesProcessor.renderProperties(model, Number(expressID))
+        propertiesProcessor.process(model)
+        highlighter.events.select.onHighlight.add((fragmentMap) => {
+            const expressID = [...Object.values(fragmentMap)[0]][0]
+            propertiesProcessor.renderProperties(model, Number(expressID))
+        })
+    }
+    catch (error) {
+        alert(error)
+    }
+}
+fragmentManager.onFragmentsLoaded.add((model) => {
+    model.properties = {}
+    onModelLoaded(model)
+})
+
+ifcloader.onIfcLoaded.add(async (model) => {
+    exportFragments(model)
+    onModelLoaded(model)
+})
+
+const importFragmentsBtn = new OBC.Button(viewer)
+importFragmentsBtn.materialIcon = "upload"
+importFragmentsBtn.tooltip = "Load FRAG file"
+
+importFragmentsBtn.onClick.add(() => {
+    const input = document.createElement("input")
+    input.type = "file"
+    input.accept = ".frag"
+    const reader = new FileReader()
+    reader.addEventListener( "load", async () => {
+        const binary = reader.result
+        if (!(binary instanceof ArrayBuffer)) {return}
+        const fragmentBinary = new Uint8Array(binary)
+        await fragmentManager.load(fragmentBinary)       
     })
+    input.addEventListener("change", () => {
+        const filesList = input.files
+        if (!filesList) {return}
+        reader.readAsArrayBuffer(filesList[0])
+    })
+    input.click()
 })
 
 const toolbar = new OBC.Toolbar(viewer)
 toolbar.addChild(
     ifcloader.uiElement.get("main"),
+    importFragmentsBtn,
     classificationBtn,
     propertiesProcessor.uiElement.get("main")
 )
