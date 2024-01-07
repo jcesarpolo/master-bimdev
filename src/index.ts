@@ -6,7 +6,7 @@ import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
 import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader";
 import { Project, IProject, UserRole, ProjectStatus} from "./class/Project";
 import { ProjectsManager } from "./class/ProjectsManager";
-import { FragmentsGroup } from "bim-fragment";
+import { FragmentsGroup, IfcProperties } from "bim-fragment";
 
 // Function to show or hide the modal depending on a toggle.
 function toggleModal(id : string, toggle: boolean) {
@@ -260,8 +260,18 @@ async function createModelTree() {
     return tree
 }
 
+//setup culler for optimization
+const culler = new OBC.ScreenCuller(viewer)
+cameraComponent.controls.addEventListener("sleep", () => {
+    culler.needsUpdate = true
+})
+
 async function onModelLoaded(model: FragmentsGroup){
     highlighter.update()
+    //add the meshes to the culler
+    for (const fragment of model.items) {culler.add(fragment.mesh)}
+    culler.needsUpdate = true
+
     try {
         classifier.byModel(model.name, model)
         classifier.byStorey(model)
@@ -280,8 +290,13 @@ async function onModelLoaded(model: FragmentsGroup){
         alert(error)
     }
 }
+let tempProperties : IfcProperties= {};
 fragmentManager.onFragmentsLoaded.add((model) => {
-    model.properties = {}
+    //add properties here
+    if (tempProperties) {
+        model.properties = tempProperties
+        tempProperties = {}
+    }
     onModelLoaded(model)
 })
 
@@ -299,26 +314,36 @@ importFragmentsBtn.onClick.add(() => {
     input.type = "file"
     input.accept=".frag, .json" 
     input.multiple = true
-    const reader = new FileReader()
-    reader.addEventListener( "load", async () => {
-        const result = reader.result
-        //if (!(binary instanceof ArrayBuffer)) {return}
-        if (result instanceof ArrayBuffer) {
-            const binary = result
-            const fragmentBinary = new Uint8Array(binary)
-            await fragmentManager.load(fragmentBinary)
-        }
-        else if (result?.endsWith(".json")) {
-            const json = result as string
-            const properties = JSON.parse(json)
-            console.log(properties)
-        }
-               
-    })
+    
     input.addEventListener("change", () => {
         const filesList = input.files
-        if (!filesList) {return}
-        reader.readAsArrayBuffer(filesList[0])
+        if (!filesList || filesList.length != 2) {return}
+        for (const file of filesList) {
+            const reader = new FileReader()
+            if (file.name.endsWith(".frag")) {
+                reader.readAsArrayBuffer(file)
+            }
+            else if (file.name.endsWith(".json")) {
+                reader.readAsText(file)
+            }
+
+            reader.addEventListener( "load", async () => {
+                const result = reader.result
+                let fragmentBinary : Uint8Array = new Uint8Array(0)
+                let properties : IfcProperties = {}
+
+                if (!result) {return}
+                if (result instanceof ArrayBuffer) {
+                    const binary = result
+                    fragmentBinary = new Uint8Array(binary)
+                } else {
+                    const json = result as string
+                    properties = JSON.parse(json) as IfcProperties
+                    tempProperties = properties
+                }
+                await fragmentManager.load(fragmentBinary)
+            })
+        }
     })
     input.click()
 })
@@ -328,7 +353,8 @@ toolbar.addChild(
     ifcloader.uiElement.get("main"),
     importFragmentsBtn,
     classificationBtn,
-    propertiesProcessor.uiElement.get("main")
+    propertiesProcessor.uiElement.get("main"),
+    fragmentManager.uiElement.get("main")
 )
 viewer.ui.addToolbar(toolbar)
 
