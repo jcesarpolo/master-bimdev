@@ -191,6 +191,7 @@ viewer.init()
 //Must be after the viewer is initialized and before the ifc loader is created
 const fragmentManager = new OBC.FragmentManager(viewer)
 function exportFragments(model : FragmentsGroup) {
+    //Export frag
     const fragmentsBinary = fragmentManager.export(model)
     const blob = new Blob([fragmentsBinary])
     const url = URL.createObjectURL(blob)
@@ -199,6 +200,16 @@ function exportFragments(model : FragmentsGroup) {
     a.download = `${model.name.replace(".ifc", "")}.frag`
     a.click()
     URL.revokeObjectURL(url)
+
+    //Export JSON
+    const json = JSON.stringify(model.properties)
+    const jsonBlob = new Blob([json], {type: "application/json"})
+    const jsonUrl = URL.createObjectURL(jsonBlob)
+    const an = document.createElement("a")
+    an.href = jsonUrl
+    an.download = `${model.name.replace(".ifc", "")}.json`
+    an.click()
+    URL.revokeObjectURL(jsonUrl)
 }
 
 
@@ -286,13 +297,23 @@ importFragmentsBtn.tooltip = "Load FRAG file"
 importFragmentsBtn.onClick.add(() => {
     const input = document.createElement("input")
     input.type = "file"
-    input.accept = ".frag"
+    input.accept=".frag, .json" 
+    input.multiple = true
     const reader = new FileReader()
     reader.addEventListener( "load", async () => {
-        const binary = reader.result
-        if (!(binary instanceof ArrayBuffer)) {return}
-        const fragmentBinary = new Uint8Array(binary)
-        await fragmentManager.load(fragmentBinary)       
+        const result = reader.result
+        //if (!(binary instanceof ArrayBuffer)) {return}
+        if (result instanceof ArrayBuffer) {
+            const binary = result
+            const fragmentBinary = new Uint8Array(binary)
+            await fragmentManager.load(fragmentBinary)
+        }
+        else if (result?.endsWith(".json")) {
+            const json = result as string
+            const properties = JSON.parse(json)
+            console.log(properties)
+        }
+               
     })
     input.addEventListener("change", () => {
         const filesList = input.files
@@ -310,3 +331,4 @@ toolbar.addChild(
     propertiesProcessor.uiElement.get("main")
 )
 viewer.ui.addToolbar(toolbar)
+
