@@ -7,6 +7,7 @@ import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader";
 import { Project, IProject, UserRole, ProjectStatus} from "./class/Project";
 import { ProjectsManager } from "./class/ProjectsManager";
 import { FragmentsGroup, IfcProperties } from "bim-fragment";
+import { TodoCreator } from "./bim-components/TodoCreator";
 
 // Function to show or hide the modal depending on a toggle.
 function toggleModal(id : string, toggle: boolean) {
@@ -348,13 +349,16 @@ importFragmentsBtn.onClick.add(() => {
     input.click()
 })
 
+const todoCreator = new TodoCreator(viewer)
+
 const toolbar = new OBC.Toolbar(viewer)
 toolbar.addChild(
     ifcloader.uiElement.get("main"),
     importFragmentsBtn,
     classificationBtn,
     propertiesProcessor.uiElement.get("main"),
-    fragmentManager.uiElement.get("main")
+    fragmentManager.uiElement.get("main"),
+    todoCreator.uiElement.get("activationButton")
 )
 viewer.ui.addToolbar(toolbar)
 
