@@ -2,6 +2,8 @@ import * as OBC from "openbim-components"
 
 export class TodoCard extends OBC.SimpleUIComponent {
 
+    onCardClick = new OBC.Event()
+    
     set description(value: string){
         const descriptionElement = this.getInnerElement("description") as HTMLParagraphElement
         descriptionElement.textContent = value
@@ -27,7 +29,10 @@ export class TodoCard extends OBC.SimpleUIComponent {
             </div>
         </div>
         `
-        
         super(components, template)
+        const cardElement = this.get()
+        cardElement.addEventListener("click", () => {
+            this.onCardClick.trigger()
+        })
     }
 }

@@ -1,10 +1,12 @@
 import * as OBC from 'openbim-components'
 import { TodoCard } from './src/TodoCard'
+import * as THREE from 'three'
 
 interface Todo {
     description: string
     date: Date
     fragmentMap: OBC.FragmentIdMap
+    camera: {position: THREE.Vector3, target: THREE.Vector3}
 }
 
 
@@ -26,8 +28,20 @@ export class TodoCreator extends OBC.Component<Todo[]> implements OBC.UI {
     }
 
     async addTodo(description: string) {
+        const camera = this._components.camera
+        if (!(camera instanceof OBC.OrthoPerspectiveCamera)){
+            throw new Error("This tool only works with OrthoPerspectiveCamera")
+        }
+        
+        const position = new THREE.Vector3()
+        camera.controls.getPosition(position)
+        const target = new THREE.Vector3()
+        camera.controls.getTarget(target)
+        const todoCamera = {position, target}
+        
         const highlighter = await this._components.tools.get(OBC.FragmentHighlighter)
         const todo : Todo = {
+            camera: todoCamera,
             description,
             date: new Date(),
             fragmentMap: highlighter.selection.select
@@ -38,6 +52,20 @@ export class TodoCreator extends OBC.Component<Todo[]> implements OBC.UI {
         todoList.addChild(todoCard)
         todoCard.description = todo.description
         todoCard.date = todo.date
+        todoCard.onCardClick.add(() => {
+            camera.controls.setLookAt(todo.camera.position.x,
+                todo.camera.position.y,
+                todo.camera.position.z,
+                todo.camera.target.x,
+                todo.camera.target.y,
+                todo.camera.target.z,
+                true)
+            
+            const fragmentsMapLength = Object.keys(todo.fragmentMap).length
+            if (fragmentsMapLength === 0) { return }
+                highlighter.highlightByID("select", todo.fragmentMap)
+            
+        })
     }
 
 
