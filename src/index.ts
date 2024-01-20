@@ -304,6 +304,7 @@ fragmentManager.onFragmentsLoaded.add((model) => {
 ifcloader.onIfcLoaded.add(async (model) => {
     exportFragments(model)
     onModelLoaded(model)
+    console.log(model)
 })
 
 const importFragmentsBtn = new OBC.Button(viewer)

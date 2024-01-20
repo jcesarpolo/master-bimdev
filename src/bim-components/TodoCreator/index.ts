@@ -1,6 +1,9 @@
 import * as OBC from 'openbim-components'
 import { TodoCard } from './src/TodoCard'
 import * as THREE from 'three'
+import { BufferGeometry, BufferAttribute, Mesh, Box3, MeshStandardMaterial } from 'three';
+
+
 
 interface Todo {
     description: string
@@ -8,6 +11,53 @@ interface Todo {
     fragmentMap: OBC.FragmentIdMap
     camera: {position: THREE.Vector3, target: THREE.Vector3}
 }
+
+
+// Function to get geometries by expressIds and compute their combined bounding box
+async function getGeometriesAndBoundingBox(expressIds: number[], scene: THREE.Scene): Promise<Box3> {
+    const meshes: THREE.Mesh[] = [];
+
+    expressIds.forEach(id => {
+        const geometry = findGeometryByExpressId(id, scene);
+        if (geometry) {
+            const material = new THREE.MeshStandardMaterial({ color: 0x8F8F8F }); // Default material
+            const mesh = new THREE.Mesh(geometry, material);
+            meshes.push(mesh);
+        }
+    });
+
+    return calculateBoundingBox(meshes);
+}
+
+// Helper function to find geometry by expressId in the scene
+function findGeometryByExpressId(expressId: number, scene: THREE.Scene): THREE.BufferGeometry | null {
+    let targetGeometry: THREE.BufferGeometry | null = null;
+    scene.traverse((child: THREE.Object3D) => {
+        if (child instanceof THREE.Mesh && child.geometry && child.geometry.attributes.expressID) {
+            const expressIDAttribute = child.geometry.attributes.expressID;
+            for (let i = 0; i < expressIDAttribute.count; i++) {
+                if (expressIDAttribute.getX(i) === expressId) {
+                    targetGeometry = child.geometry;
+                    break;
+                }
+            }
+        }
+    });
+    return targetGeometry;
+}
+
+// Function to calculate the bounding box from an array of meshes
+function calculateBoundingBox(meshes: THREE.Mesh[]): Box3 {
+    const boundingBox = new THREE.Box3();
+    meshes.forEach(mesh => {
+        mesh.geometry.computeBoundingBox();
+        if (mesh.geometry.boundingBox){
+            boundingBox.union(mesh.geometry.boundingBox);
+        }
+    });
+    return boundingBox;
+}
+
 
 
 export class TodoCreator extends OBC.Component<Todo[]> implements OBC.UI {
@@ -40,6 +90,7 @@ export class TodoCreator extends OBC.Component<Todo[]> implements OBC.UI {
         const todoCamera = {position, target}
         
         const highlighter = await this._components.tools.get(OBC.FragmentHighlighter)
+        console.log(highlighter.selection.select)
         const todo : Todo = {
             camera: todoCamera,
             description,
@@ -52,7 +103,17 @@ export class TodoCreator extends OBC.Component<Todo[]> implements OBC.UI {
         todoList.addChild(todoCard)
         todoCard.description = todo.description
         todoCard.date = todo.date
-        todoCard.onCardClick.add(() => {
+        todoCard.onCardClick.add(async () => {
+            
+            // const expressIds = Object.values(todo.fragmentMap)
+            // .flatMap(set => Array.from(set)) // Convert each Set to an array and flatten
+            // .map(id => parseInt(id, 10));
+            // const boundingBoxes = await getGeometriesAndBoundingBox(expressIds, this._components.scene.get())
+            // console.log(boundingBoxes)
+            // camera.controls.fitToBox(boundingBoxes, true)
+            
+            console.log(this._components.scene.get().children)
+
             camera.controls.setLookAt(todo.camera.position.x,
                 todo.camera.position.y,
                 todo.camera.position.z,
@@ -64,7 +125,7 @@ export class TodoCreator extends OBC.Component<Todo[]> implements OBC.UI {
             const fragmentsMapLength = Object.keys(todo.fragmentMap).length
             if (fragmentsMapLength === 0) { return }
                 highlighter.highlightByID("select", todo.fragmentMap)
-            
+            //console.log(todo.fragmentMap)
         })
     }
 
