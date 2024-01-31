@@ -134,8 +134,16 @@ export class TodoCreator extends OBC.Component<Todo[]> implements OBC.UI {
                 highlighter.highlightByID("select", todo.fragmentMap)
             //console.log(todo.fragmentMap)
         })
+        todoCard.onDeleteClick.add(() => {
+            this.deleteTodo(todo, todoCard)
+        })
     }
 
+    deleteTodo(todo: Todo, todoCard: TodoCard){
+        todoCard.dispose()
+        const index = this._list.indexOf(todo)
+        this._list.splice(index, 1)
+    }
 
     private async setUI(){
         const activationButton = new OBC.Button(this._components)

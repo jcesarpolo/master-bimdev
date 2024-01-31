@@ -3,6 +3,8 @@ import * as OBC from "openbim-components"
 export class TodoCard extends OBC.SimpleUIComponent {
 
     onCardClick = new OBC.Event()
+    onDeleteClick = new OBC.Event()
+
     slots: { 
         actionButtons: OBC.SimpleUIComponent
     }
@@ -39,13 +41,19 @@ export class TodoCard extends OBC.SimpleUIComponent {
         const cardElement = this.get()
         cardElement.addEventListener("click", () => {
             this.onCardClick.trigger()
+            console.log("card clicked")
         })
 
         this.setSlot("actionButtons", new OBC.SimpleUIComponent(this.components))
         
         const deleteBtn = new OBC.Button(this.components)
         deleteBtn.materialIcon = "delete"
-
         this.slots.actionButtons.addChild(deleteBtn)
+
+        const deleteBtnElement = deleteBtn.get()
+        deleteBtnElement.onclick = (event) => {
+            this.onDeleteClick.trigger()
+        }
+
     }
 }
