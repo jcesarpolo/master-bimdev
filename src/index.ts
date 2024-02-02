@@ -8,6 +8,7 @@ import { Project, IProject, UserRole, ProjectStatus} from "./class/Project";
 import { ProjectsManager } from "./class/ProjectsManager";
 import { FragmentsGroup, IfcProperties } from "bim-fragment";
 import { TodoCreator } from "./bim-components/TodoCreator";
+import { SimpleQTO } from "./bim-components/SimpleQTO";
 
 // Function to show or hide the modal depending on a toggle.
 function toggleModal(id : string, toggle: boolean) {
@@ -352,6 +353,13 @@ importFragmentsBtn.onClick.add(() => {
 
 const todoCreator = new TodoCreator(viewer)
 await todoCreator.setup()
+todoCreator.onProjectCreated.add((todo) => {
+    console.log(todo)
+})
+
+const simpleQto = new SimpleQTO(viewer)
+await simpleQto.setup()
+
 
 const toolbar = new OBC.Toolbar(viewer)
 toolbar.addChild(
@@ -360,7 +368,8 @@ toolbar.addChild(
     classificationBtn,
     propertiesProcessor.uiElement.get("main"),
     fragmentManager.uiElement.get("main"),
-    todoCreator.uiElement.get("activationButton")
+    todoCreator.uiElement.get("activationButton"),
+    simpleQto.uiElement.get("activationBtn")
 )
 viewer.ui.addToolbar(toolbar)
 

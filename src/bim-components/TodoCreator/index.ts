@@ -59,8 +59,9 @@ interface Todo {
 //     return boundingBox;
 // }
 
-export class TodoCreator extends OBC.Component<Todo[]> implements OBC.UI {
+export class TodoCreator extends OBC.Component<Todo[]> implements OBC.UI, OBC.Disposable {
     static uuid = "c8b94e2b-23a4-4840-98b7-ef0e790a2b01"
+    onProjectCreated = new OBC.Event<Todo>()
     enabled = true
     uiElement = new OBC.UIElement<{
         activationButton: OBC.Button
@@ -76,6 +77,12 @@ export class TodoCreator extends OBC.Component<Todo[]> implements OBC.UI {
         this.setUI()
     }
 
+    async dispose(){
+        this.uiElement.dispose()
+        this._list = []
+        this.enabled = false
+    }
+
     async setup(){
         const highlighter = await this._components.tools.get(OBC.FragmentHighlighter)
         highlighter.add(`${TodoCreator.uuid}-priority-Low`, [new THREE.MeshStandardMaterial({color: 0x50bc59})])
@@ -84,6 +91,7 @@ export class TodoCreator extends OBC.Component<Todo[]> implements OBC.UI {
     }
 
     async addTodo(description: string, priority: ToDoPriority) {
+        if (!this.enabled) { return }
         const camera = this._components.camera
         if (!(camera instanceof OBC.OrthoPerspectiveCamera)){
             throw new Error("This tool only works with OrthoPerspectiveCamera")
@@ -137,6 +145,7 @@ export class TodoCreator extends OBC.Component<Todo[]> implements OBC.UI {
         todoCard.onDeleteClick.add(() => {
             this.deleteTodo(todo, todoCard)
         })
+        this.onProjectCreated.trigger(todo)
     }
 
     deleteTodo(todo: Todo, todoCard: TodoCard){

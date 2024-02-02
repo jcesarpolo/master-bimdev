@@ -41,7 +41,6 @@ export class TodoCard extends OBC.SimpleUIComponent {
         const cardElement = this.get()
         cardElement.addEventListener("click", () => {
             this.onCardClick.trigger()
-            console.log("card clicked")
         })
 
         this.setSlot("actionButtons", new OBC.SimpleUIComponent(this.components))
@@ -54,6 +53,5 @@ export class TodoCard extends OBC.SimpleUIComponent {
         deleteBtnElement.onclick = (event) => {
             this.onDeleteClick.trigger()
         }
-
     }
 }
