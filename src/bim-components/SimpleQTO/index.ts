@@ -42,7 +42,9 @@ export class SimpleQTO extends OBC.Component<null> implements OBC.UI, OBC.Dispos
 
         this.uiElement.set({activationBtn, qtoList})
     }
-
+    resetQuantities(){
+        
+    }
     async sumQuantities(fragmentIdMap: OBC.FragmentIdMap){
         const fragmentManager = await this._components.tools.get(OBC.FragmentManager)
         for (const fragmentId in fragmentIdMap){
