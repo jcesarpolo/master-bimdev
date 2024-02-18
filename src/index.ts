@@ -217,7 +217,7 @@ function exportFragments(model : FragmentsGroup) {
 
 const ifcloader = new OBC.FragmentIfcLoader(viewer)
 ifcloader.settings.wasm = {
-    path: "https://unpkg.com/web-ifc@0.0.43/",
+    path: "https://unpkg.com/web-ifc@0.0.44/",
     absolute: true
 }
 
