@@ -2,14 +2,15 @@ import * as OBC from "openbim-components"
 import { FragmentsGroup } from "bim-fragment"
 import * as WEBIFC from "web-ifc"
 
+type QtoResult = { [name: string]: {[qtoName: string]: number} }
 
-export class SimpleQTO extends OBC.Component<null> implements OBC.UI, OBC.Disposable{
+export class SimpleQTO extends OBC.Component<QtoResult> implements OBC.UI, OBC.Disposable{
     private _components: OBC.Components
+    private _qtoResult: QtoResult = {}
     static uuid = "4167d90b-9b08-44b8-a547-f1c9ccafde33"
     uiElement = new OBC.UIElement<{
         activationBtn: OBC.Button
         qtoList: OBC.FloatingWindow
-    
     }>()
     enabled: boolean = true
     
@@ -24,6 +25,9 @@ export class SimpleQTO extends OBC.Component<null> implements OBC.UI, OBC.Dispos
         const highlighter = await this._components.tools.get(OBC.FragmentHighlighter)
         highlighter.events.select.onHighlight.add((fragmentIdMap) => {
             this.sumQuantities(fragmentIdMap)
+        })
+        highlighter.events.select.onClear.add(() => {
+            this.resetQuantities()
         })
     }
 
@@ -44,11 +48,11 @@ export class SimpleQTO extends OBC.Component<null> implements OBC.UI, OBC.Dispos
         this.uiElement.set({activationBtn, qtoList})
     }
     resetQuantities(){
-        
+        this._qtoResult = {}
     }
     async sumQuantities(fragmentIdMap: OBC.FragmentIdMap){
         const fragmentManager = await this._components.tools.get(OBC.FragmentManager)
-        const highlighter = await this._components.tools.get(OBC.FragmentHighlighter)
+        //const highlighter = await this._components.tools.get(OBC.FragmentHighlighter)
         for (const fragmentId in fragmentIdMap){
             const fragment = fragmentManager.list[fragmentId]
             const model = fragment.mesh.parent
@@ -60,23 +64,32 @@ export class SimpleQTO extends OBC.Component<null> implements OBC.UI, OBC.Dispos
                     const set = properties[setID]
                     const expressIDs = fragmentIdMap[fragmentId]
                     const workingIDs = relatedIDs.filter(id => expressIDs.has(id.toString()))
-                    if (set.type !== WEBIFC.IFCELEMENTQUANTITY || workingIDs.length === 0) {return}
+                    const {name: setName} = OBC.IfcPropertiesUtils.getEntityName(properties, setID)
+                    if (set.type !== WEBIFC.IFCELEMENTQUANTITY || workingIDs.length === 0 || !setName) {return}
+                    if (!(setName in this._qtoResult)) {this._qtoResult[setName] = {}}
                     OBC.IfcPropertiesUtils.getQsetQuantities(
                         properties,
                         setID,
                         (qtoID) => {
-
+                            const {name: qtoName} = OBC.IfcPropertiesUtils.getEntityName(properties, qtoID)
+                            const {value} = OBC.IfcPropertiesUtils.getQuantityValue(properties, qtoID)
+                            if (!qtoName || !value) {return}
+                            if (!(qtoName in this._qtoResult[setName])) {this._qtoResult[setName][qtoName] = 0}
+                            this._qtoResult[setName][qtoName] += value
                         }
                     )
-                })
+                }
+            )
         }
+        console.log(this._qtoResult)
     }
 
     async dispose () {
         this.uiElement.dispose()
+        this.resetQuantities()
     }
 
-    get(): null {
-        return null
+    get(): QtoResult {
+        return this._qtoResult
     }
 }
