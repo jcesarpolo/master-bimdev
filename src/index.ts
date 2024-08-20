@@ -1,9 +1,13 @@
 import * as THREE from "three";
 import * as OBC from "openbim-components"
-import {GUI} from "three/examples/jsm/libs/lil-gui.module.min"
-import {OrbitControls} from "three/examples/jsm/controls/OrbitControls"
-import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
-import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader";
+// import {GUI} from "three/examples/jsm/libs/lil-gui.module.min"
+// import {OrbitControls} from "three/examples/jsm/controls/OrbitControls"
+// import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
+// import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader";
+import {GUI} from "three/examples/jsm/libs/lil-gui.module.min.js"
+import {OrbitControls} from "three/examples/jsm/controls/OrbitControls.js"
+import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
+import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader.js";
 import { Project, IProject, UserRole, ProjectStatus} from "./class/Project";
 import { ProjectsManager } from "./class/ProjectsManager";
 import { FragmentsGroup, IfcProperties } from "bim-fragment";
@@ -360,6 +364,9 @@ todoCreator.onProjectCreated.add((todo) => {
 const simpleQto = new SimpleQTO(viewer)
 await simpleQto.setup()
 
+const propsFinder = new OBC.IfcPropertiesFinder(viewer)
+await propsFinder.init()
+
 
 const toolbar = new OBC.Toolbar(viewer)
 toolbar.addChild(
@@ -367,6 +374,7 @@ toolbar.addChild(
     importFragmentsBtn,
     classificationBtn,
     propertiesProcessor.uiElement.get("main"),
+    propsFinder.uiElement.get("main"),
     fragmentManager.uiElement.get("main"),
     todoCreator.uiElement.get("activationButton"),
     simpleQto.uiElement.get("activationBtn")
