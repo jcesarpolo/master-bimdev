@@ -3,6 +3,7 @@ import * as OBC from "openbim-components"
 import * as React from "react";
 import * as ReactDOM from "react-dom/client";
 import { Sidebar } from "./react-components/Sidebar";
+import { ProjectsPage } from "./react-components/ProjectsPage";
 // import {GUI} from "three/examples/jsm/libs/lil-gui.module.min"
 // import {OrbitControls} from "three/examples/jsm/controls/OrbitControls"
 // import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
@@ -20,7 +21,10 @@ import { SimpleQTO } from "./bim-components/SimpleQTO";
 const rootElement = document.getElementById("app") as HTMLDivElement
 const appRoot = ReactDOM.createRoot(rootElement)
 appRoot.render(
-    <Sidebar/>
+    <>
+        <Sidebar/>
+        <ProjectsPage/>
+    </>
 )
 
 // Function to show or hide the modal depending on a toggle.
@@ -48,7 +52,7 @@ if (newProjectBtn !== null) {
 }
 
 const projectsListUI = document.getElementById("projects-list") as HTMLElement
-const projectsManager = new ProjectsManager(projectsListUI)
+const projectsManager = new ProjectsManager()
 
 const projectForm = document.getElementById("new-project-form")
 const popup = document.getElementById("error-popup")

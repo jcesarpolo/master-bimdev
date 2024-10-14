@@ -2,10 +2,8 @@ import { IProject, Project } from "./Project"
 
 export class ProjectsManager {
     list: Project[] = []
-    ui : HTMLElement
 
-    constructor(container: HTMLElement) {
-        this.ui = container
+    constructor() {
         const project = this.newProject({
             name: "Project 1",
             description: "This is a description",
@@ -13,7 +11,7 @@ export class ProjectsManager {
             status: "Active",
             finishDate: new Date()
             })
-        project.ui.click()
+        // project.ui.click()
     }
 
 
@@ -30,16 +28,16 @@ export class ProjectsManager {
         }
 
         const project = new Project(data)
-        project.ui.addEventListener("click", () => { 
-            const projectsPage = document.getElementById("projects-page")
-            const detailsPage = document.getElementById("project-details")
-            if (!projectsPage || !detailsPage) {return}
-            projectsPage.style.display = "none"
-            detailsPage.style.display = "flex"
-            this.setDetailsPage(project)
-        })
+        // project.ui.addEventListener("click", () => { 
+        //     const projectsPage = document.getElementById("projects-page")
+        //     const detailsPage = document.getElementById("project-details")
+        //     if (!projectsPage || !detailsPage) {return}
+        //     projectsPage.style.display = "none"
+        //     detailsPage.style.display = "flex"
+        //     this.setDetailsPage(project)
+        // })
 
-        this.ui.appendChild(project.ui)
+        // this.ui.appendChild(project.ui)
         this.list.push(project)
         return project
     }
@@ -91,7 +89,7 @@ export class ProjectsManager {
     deleteProject (id: string) {
         const project = this.getProject(id)
         if (!project) {return}
-        project.ui.remove()
+        // project.ui.remove()
         const remaining = this.list.filter((project) => {
             return project.id !== id
         })
