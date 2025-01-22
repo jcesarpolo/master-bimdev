@@ -19,8 +19,8 @@ export class ProjectsManager {
         const projectNames = this.list.map((project) => {
             return project.name
         })
-        const nameInUuse = (projectNames.includes(data.name))
-        if (nameInUuse) {
+        const nameInUse = (projectNames.includes(data.name))
+        if (nameInUse) {
             throw new Error(`A project with the name "${data.name}" already exist`)
         }
         if (data.name.length < 5) {
